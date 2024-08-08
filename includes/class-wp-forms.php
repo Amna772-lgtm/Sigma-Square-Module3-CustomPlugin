@@ -108,4 +108,4 @@ class Wp_Forms
 register_activation_hook(__FILE__, array('Wp_Forms_Activator', 'activate'));
 
 // Register deactivation hook
-register_deactivation_hook(__FILE__, array('Wp_Forms_Deactivator', 'deactivate_plugin'));
+register_deactivation_hook(__FILE__, array('Wp_Forms_Deactivator', 'deactivate'));
