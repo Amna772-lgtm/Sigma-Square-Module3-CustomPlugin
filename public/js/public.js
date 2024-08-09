@@ -6,7 +6,7 @@ jQuery(document).ready(function ($) {
 
     $.ajax({
       type: "POST",
-      url: wpforms_vars.ajax_url,
+      url: todolist_vars.ajax_url,
       data: $(this).serialize(),
       success: function (response) {
         //console.log("Registration response:", response);
@@ -22,14 +22,15 @@ jQuery(document).ready(function ($) {
 
         if (response.success) {
           alert("Registration successful. Redirecting to login page...");
-          window.location.href = wpforms_vars.login_url;
+          window.location.href = todolist_vars.login_url;
         } else {
           if (
             response.errors.email &&
             response.errors.email.includes("Email already exists")
           ) {
             alert("Email already exists. Redirecting to login page...");
-            window.location.href = wpforms_vars.login_url;
+            window.location.href = todolist_vars
+            .login_url;
           }
 
           // Display errors under respective fields
@@ -56,7 +57,7 @@ jQuery(document).ready(function ($) {
 
     $.ajax({
       type: "POST",
-      url: wpforms_vars.ajax_url,
+      url: todolist_vars.ajax_url,
       data: $(this).serialize(),
       success: function (response) {
         //console.log("Login response:", response);
@@ -70,7 +71,7 @@ jQuery(document).ready(function ($) {
 
         if (response.success) {
           alert("Login successful. Redirecting to todo list page...");
-          window.location.href = wpforms_vars.todo_list_url;
+          window.location.href = todolist_vars.todo_list_url;
         } else {
           // Display errors under respective fields
           for (let key in response.errors) {
@@ -82,7 +83,7 @@ jQuery(document).ready(function ($) {
             response.errors.email.includes("User not registered")
           ) {
             alert("User not registered. Redirecting to register page...");
-            window.location.href = wpforms_vars.register_url;
+            window.location.href = todolist_vars.register_url;
           }
         }
       },
@@ -99,7 +100,7 @@ jQuery(document).ready(function ($) {
 
     $.ajax({
       type: "POST",
-      url: wpforms_vars.ajax_url,
+      url: todolist_vars.ajax_url,
       data: $(this).serialize(),
       success: function (response) {
         try {
@@ -128,7 +129,7 @@ jQuery(document).ready(function ($) {
   function fetchTasks() {
     $.ajax({
       type: "POST",
-      url: wpforms_vars.ajax_url,
+      url: todolist_vars.ajax_url,
       data: { action: "fetch_tasks" },
       success: function (response) {
         try {
@@ -191,7 +192,7 @@ jQuery(document).ready(function ($) {
 
     $.ajax({
       type: "POST",
-      url: wpforms_vars.ajax_url,
+      url: todolist_vars.ajax_url,
       data: {
         action: "update_todo",
         task_id: taskId,

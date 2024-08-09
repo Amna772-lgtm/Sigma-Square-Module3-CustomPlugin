@@ -1,8 +1,8 @@
 <?php
 /*
- * Plugin Name:       WP Forms
- * Plugin URI:        https://http://module3.local/wp-admin/plugins/wp-forms.php
- * Description:       Custom plugin containing forms of login and registration functionalities 
+ * Plugin Name:       Todo List
+ * Plugin URI:        https://http://module3.local/wp-admin/plugins/todo-list.php
+ * Description:       Custom plugin perform todo list functionality
  * Version:           1.0.0
  * Requires at least: 5.2
  * Requires PHP:      7.2
@@ -11,12 +11,12 @@
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI:        https://example.com/my-plugin/
- * Text Domain:       wp-forms
+ * Text Domain:       todo-list
  * Domain Path:       /languages
  */
 
 
-class Wp_Forms
+class Todo_List
 {
 
     protected $plugin_name;
@@ -25,7 +25,7 @@ class Wp_Forms
     public function __construct()
     {
 
-        $this->plugin_name = 'wp-forms';
+        $this->plugin_name = 'todo-list';
         $this->version = '1.0.0';
 
         //load dependencies
@@ -40,10 +40,10 @@ class Wp_Forms
     private function load_dependencies()
     {
         //include all files
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-wp-forms-activator.php';
-        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-wp-forms-deactivator.php';
-        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-wp-forms-admin.php';
-        require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-wp-forms-public.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-todo-list-activator.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-todo-list-deactivator.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-todo-list-admin.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-todo-list-public.php';
     }
 
 
@@ -53,7 +53,7 @@ class Wp_Forms
      */
     private function define_admin_hooks()
     {
-        $plugin_admin = new Wp_Forms_Admin();
+        $plugin_admin = new Todo_List_Admin();
         add_action('admin_enqueue_scripts', array($plugin_admin, 'enqueue_styles'));
         add_action('admin_enqueue_scripts', array($plugin_admin, 'enqueue_scripts'));
     }
@@ -64,7 +64,7 @@ class Wp_Forms
      */
     private function define_public_hooks()
     {
-        $plugin_public = new Wp_Forms_Public();
+        $plugin_public = new Todo_List_Public();
 
         //for session
         add_action('init', array($plugin_public, 'start_session'), 1);
@@ -73,9 +73,9 @@ class Wp_Forms
         add_action('wp_enqueue_scripts', array($plugin_public, 'enqueue_scripts'));
 
         // Add shortcodes of login, registration and todo-list forms
-        add_shortcode('wp_forms_registration', array($plugin_public, 'registration_form'));
-        add_shortcode('wp_forms_login', array($plugin_public, 'login_form'));
-        add_shortcode('wp_forms_todo_list', array($plugin_public, 'todo_list_form'));
+        add_shortcode('todo_list_registration_form', array($plugin_public, 'registration_form'));
+        add_shortcode('todo_list_login_form', array($plugin_public, 'login_form'));
+        add_shortcode('todo_list_form', array($plugin_public, 'todo_list_form'));
 
         // Register AJAX actions 
         add_action('wp_ajax_register', array($plugin_public, 'handle_registration'));
@@ -105,7 +105,7 @@ class Wp_Forms
 
 
 // Register activation hook
-register_activation_hook(__FILE__, array('Wp_Forms_Activator', 'activate'));
+register_activation_hook(__FILE__, array('Todo_List_Activator', 'activate'));
 
 // Register deactivation hook
-register_deactivation_hook(__FILE__, array('Wp_Forms_Deactivator', 'deactivate'));
+register_deactivation_hook(__FILE__, array('Todo_List_Deactivator', 'deactivate'));

@@ -3,7 +3,7 @@
  * Public site functionality of plugin
  */
 
-class Wp_Forms_Public
+class Todo_List_Public
 {
     private $version = '1.0.0';
     public function __construct()
@@ -35,19 +35,19 @@ class Wp_Forms_Public
     //including css file
     public function enqueue_styles()
     {
-        wp_enqueue_style('wp-forms-public', plugin_dir_url(__FILE__) . 'css/public.css', array(), $this->version, 'all');
+        wp_enqueue_style('todo-list-public', plugin_dir_url(__FILE__) . 'css/public.css', array(), $this->version, 'all');
     }
 
 
     //including js file
     public function enqueue_scripts()
     {
-        wp_enqueue_script('wp-forms-public', plugin_dir_url(__FILE__) . 'js/public.js', array('jquery'), $this->version, false);
+        wp_enqueue_script('todo-list-public', plugin_dir_url(__FILE__) . 'js/public.js', array('jquery'), $this->version, false);
 
         //used to pass data from PHP to JavaScript files. 
         wp_localize_script(
-            'wp-forms-public',
-            'wpforms_vars',
+            'todo-list-public',
+            'todolist_vars',
             array(
                 'ajax_url' => admin_url('admin-ajax.php'), //URL to handle ajex request
                 'login_url' => site_url('/login'),
