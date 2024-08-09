@@ -66,9 +66,6 @@ class Todo_List
     {
         $plugin_public = new Todo_List_Public();
 
-        //for session
-        add_action('init', array($plugin_public, 'start_session'), 1);
-
         add_action('wp_enqueue_scripts', array($plugin_public, 'enqueue_styles'));
         add_action('wp_enqueue_scripts', array($plugin_public, 'enqueue_scripts'));
 

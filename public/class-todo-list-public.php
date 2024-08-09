@@ -8,29 +8,20 @@ class Todo_List_Public
     private $version = '1.0.0';
     public function __construct()
     {
-        //add_action('init', array($this, 'start_session'));
+
     }
 
 
-    // Start session
-    public function start_session()
-    {
-        if (!session_id()) {
-            session_start();
-        }
-    }
-
-    // Check if user is logged in
     public function is_user_logged_in()
     {
-        return isset($_SESSION['user_id']);
+        return is_user_logged_in();
     }
 
-    // Get the ID of the logged-in user
     public function get_logged_in_user_id()
     {
-        return $this->is_user_logged_in() ? $_SESSION['user_id'] : null;
+        return get_current_user_id();
     }
+
 
     //including css file
     public function enqueue_styles()
@@ -111,9 +102,6 @@ class Todo_List_Public
     public function handle_registration()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'register') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'register_users';
-
             $name = sanitize_text_field($_POST['name']);
             $email = sanitize_email($_POST['email']);
             $password = $_POST['password'];
@@ -141,30 +129,27 @@ class Todo_List_Public
             // Check if there are no validation errors
             if (empty($errors)) {
                 // Check if the email already exists
-                $existing_user = $wpdb->get_var($wpdb->prepare("SELECT email FROM $table_name WHERE email = %s", $email));
-                if ($existing_user) {
-                    // If the user already exists
+                if (email_exists($email)) {
                     $errors['email'] = "Email already exists";
                 } else {
                     // Register the user
-                    $wpdb->insert(
-                        $table_name,
-                        array(
-                            'name' => $name,
-                            'email' => $email,
-                            'password' => wp_hash_password($password)
-                        )
-                    );
+                    $user_id = wp_create_user($email, $password, $email);
 
-                    if ($wpdb->last_error) {
-                        error_log("DB Error: " . $wpdb->last_error);
-                        echo json_encode(array('success' => false, 'errors' => array('db' => 'Database error occurred.')));
+                    if (is_wp_error($user_id)) {
+                        $errors['db'] = $user_id->get_error_message();
+                    } else {
+                        // Update the user's display name
+                        wp_update_user(
+                            array(
+                                'ID' => $user_id,
+                                'display_name' => $name
+                            )
+                        );
+
+                        // Successfully registered
+                        echo json_encode(array('success' => true));
                         wp_die();
                     }
-
-                    // Successfully registered
-                    echo json_encode(array('success' => true));
-                    wp_die();
                 }
             }
 
@@ -173,6 +158,7 @@ class Todo_List_Public
             wp_die();
         }
     }
+
 
     /**
      * Login form shortcode
@@ -220,52 +206,43 @@ class Todo_List_Public
     public function handle_login()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'login') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'register_users';
-
             $email = sanitize_email($_POST['email']);
             $password = $_POST['password'];
 
             $errors = array();
 
-            // Input validation
             if (!is_email($email)) {
                 $errors['email'] = "Please enter a valid email";
             }
 
-            // Validate password pattern
             if (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}:;<>,.?~\\/-]{8,}$/', $password)) {
                 $errors['password'] = "Password must be at least 8 characters long and contain at least one capital letter, one special character, and one number.";
             }
 
-            // Check if the email exists
             if (empty($errors)) {
-                $user = $wpdb->get_row(
-                    $wpdb->prepare("SELECT * FROM $table_name WHERE email = %s", $email)
+                $user = wp_signon(
+                    array(
+                        'user_login' => $email,
+                        'user_password' => $password,
+                        'remember' => true
+                    )
                 );
 
-                if (!$user) {
-                    $errors['email'] = "User not registered";
-                } elseif (!wp_check_password($password, $user->password)) {
-                    $errors['password'] = "Incorrect password";
+                if (is_wp_error($user)) {
+                    $errors['email'] = "User not registered or incorrect password";
+                } else {
+                    // Respond with success
+                    echo json_encode(array('success' => true));
+                    wp_die();
                 }
             }
 
-            // Return errors if validation failed or credentials are incorrect
-            if (!empty($errors)) {
-                echo json_encode(array('success' => false, 'errors' => $errors));
-            } else {
-
-                // Set session variables
-                $_SESSION['user_id'] = $user->id;
-                $_SESSION['user_email'] = $user->email;
-
-                // Respond with success
-                echo json_encode(array('success' => true));
-            }
-            wp_die(); //used to terminate script execution
+            // Return errors if validation failed
+            echo json_encode(array('success' => false, 'errors' => $errors));
+            wp_die();
         }
     }
+
 
 
     /**
@@ -277,18 +254,12 @@ class Todo_List_Public
 
         // Fetch the logged-in user's name
         $user_id = $this->get_logged_in_user_id();
-        if ($user_id) {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'register_users';
-            $user = $wpdb->get_row($wpdb->prepare("SELECT name FROM $table_name WHERE id = %d", $user_id));
-            $user_name = $user ? $user->name : 'User';
-        } else {
-            $user_name = 'User';
-        }
+        $user_info = get_userdata($user_id);
+        $user_name = $user_info->display_name;
         ?>
-        
+
         <div class="todo-container">
-            <h1 class="todo-title"><?php echo esc_html($user_name); ?>'s Task List</h1>
+            <h1 class="todo-title"><?php echo $user_name; ?>'s Task List</h1>
             <form id="todo-form" class="todo-form">
                 <input type="hidden" name="action" value="add_todo">
                 <div class="todo-input-group">
@@ -312,9 +283,6 @@ class Todo_List_Public
     public function handle_add_todo()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'add_todo') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'todo_list';
-
             if (!$this->is_user_logged_in()) {
                 echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to add a task')));
                 wp_die();
@@ -328,26 +296,22 @@ class Todo_List_Public
                 wp_die();
             }
 
-            $wpdb->insert(
-                $table_name,
-                array(
-                    'user_id' => $user_id,
-                    'task' => $task,
-                    'status' => 'pending'
-                )
-            );
-
-            if ($wpdb->last_error) {
-                error_log("DB Error: " . $wpdb->last_error);
-                echo json_encode(array('success' => false, 'errors' => array('db' => 'Database error occurred.')));
-                wp_die();
+            // Store task in user meta
+            $tasks = get_user_meta($user_id, 'todo_tasks', true);
+            if (!$tasks) {
+                $tasks = array();
             }
+
+            // Use user ID as part of the task ID
+            $task_id = $user_id . '-' . uniqid();
+            $tasks[] = array('id' => $task_id, 'task' => $task, 'status' => 'pending');
+
+            update_user_meta($user_id, 'todo_tasks', $tasks);
 
             echo json_encode(array('success' => true));
             wp_die();
         }
     }
-
 
 
     /**
@@ -356,16 +320,16 @@ class Todo_List_Public
     public function fetch_tasks()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'fetch_tasks') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'todo_list';
-            $user_id = $_SESSION['user_id'];
-
-            $tasks = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id));
-
-            if ($wpdb->last_error) {
-                error_log("DB Error: " . $wpdb->last_error);
-                echo json_encode(array('success' => false, 'errors' => array('db' => 'Database error occurred.')));
+            if (!$this->is_user_logged_in()) {
+                echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to fetch tasks')));
                 wp_die();
+            }
+
+            $user_id = $this->get_logged_in_user_id();
+            $tasks = get_user_meta($user_id, 'todo_tasks', true);
+
+            if (!$tasks) {
+                $tasks = array();
             }
 
             echo json_encode(array('success' => true, 'tasks' => $tasks));
@@ -380,28 +344,42 @@ class Todo_List_Public
     public function handle_update_todo()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'update_todo') {
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'todo_list';
-
-            $task_id = intval($_POST['task_id']);
-            $status = sanitize_text_field($_POST['status']);
-
-            $wpdb->update(
-                $table_name,
-                array('status' => $status),
-                array('id' => $task_id)
-            );
-
-            if ($wpdb->last_error) {
-                error_log("DB Error: " . $wpdb->last_error);
-                echo json_encode(array('success' => false, 'errors' => array('db' => 'Database error occurred.')));
+            if (!$this->is_user_logged_in()) {
+                echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to update a task')));
                 wp_die();
             }
 
-            echo json_encode(array('success' => true));
+            $task_id = sanitize_text_field($_POST['task_id']);
+            $status = sanitize_text_field($_POST['status']);
+            $user_id = $this->get_logged_in_user_id();
+
+            // Fetch existing tasks
+            $tasks = get_user_meta($user_id, 'todo_tasks', true);
+            if (!$tasks) {
+                $tasks = array();
+            }
+
+            // Find and update the task
+            $task_found = false;
+            foreach ($tasks as &$task) {
+                if (isset($task['id']) && $task['id'] === $task_id) {
+                    $task['status'] = $status;
+                    $task_found = true;
+                    break;
+                }
+            }
+
+            if ($task_found) {
+                // Update the user meta with the updated tasks
+                update_user_meta($user_id, 'todo_tasks', $tasks);
+                echo json_encode(array('success' => true));
+            } else {
+                echo json_encode(array('success' => false, 'errors' => array('task' => 'Task not found')));
+            }
             wp_die();
         }
     }
+
 
 }
 

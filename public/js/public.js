@@ -2,14 +2,11 @@ jQuery(document).ready(function ($) {
   $("#register").on("submit", function (e) {
     e.preventDefault();
 
-    //console.log("Registration form submitted");
-
     $.ajax({
       type: "POST",
       url: todolist_vars.ajax_url,
       data: $(this).serialize(),
       success: function (response) {
-        //console.log("Registration response:", response);
         try {
           response = JSON.parse(response);
         } catch (e) {
@@ -29,8 +26,7 @@ jQuery(document).ready(function ($) {
             response.errors.email.includes("Email already exists")
           ) {
             alert("Email already exists. Redirecting to login page...");
-            window.location.href = todolist_vars
-            .login_url;
+            window.location.href = todolist_vars.login_url;
           }
 
           // Display errors under respective fields
@@ -53,14 +49,11 @@ jQuery(document).ready(function ($) {
   $("#login").on("submit", function (e) {
     e.preventDefault();
 
-    //console.log("Login form submitted");
-
     $.ajax({
       type: "POST",
       url: todolist_vars.ajax_url,
       data: $(this).serialize(),
       success: function (response) {
-        //console.log("Login response:", response);
         try {
           response = JSON.parse(response);
         } catch (e) {
@@ -94,6 +87,7 @@ jQuery(document).ready(function ($) {
     });
   });
 
+
   // Handle task addition
   $("#todo-form").on("submit", function (e) {
     e.preventDefault();
@@ -124,6 +118,7 @@ jQuery(document).ready(function ($) {
       },
     });
   });
+
 
   // Fetch tasks for the logged-in user
   function fetchTasks() {
@@ -184,10 +179,18 @@ jQuery(document).ready(function ($) {
     });
   }
 
+
   // Handle task update
   $("#todo-list").on("click", ".todo-update-button", function () {
     const taskItem = $(this).closest(".todo-item");
     const taskId = taskItem.data("task-id");
+
+    if (taskId === undefined || taskId === null) {
+      //console.error("Task ID is undefined or null");
+      //alert("Task ID is missing. Please try again.");
+      //return;
+    }
+
     const status = taskItem.find(".todo-status").val();
 
     $.ajax({
@@ -213,6 +216,7 @@ jQuery(document).ready(function ($) {
         }
       },
       error: function (xhr, status, error) {
+        console.error("AJAX Error:", status, error);
         alert("An error occurred while updating the task. Please try again.");
       },
     });

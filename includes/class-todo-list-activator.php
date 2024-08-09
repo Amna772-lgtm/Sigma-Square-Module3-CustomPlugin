@@ -7,42 +7,8 @@ class Todo_List_Activator
 {
     public static function activate()
     {
-        self::todo_list_create_table();
+        //nothing to do
     }
 
-    private static function todo_list_create_table()
-    {
-        global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
-
-        // Table for registered users
-        $table_name_users = $wpdb->prefix . 'register_users';
-        $sql_users = "CREATE TABLE $table_name_users (
-             id mediumint(9) NOT NULL AUTO_INCREMENT,
-             name varchar(255) NOT NULL,
-             email varchar(255) NOT NULL UNIQUE,
-             password varchar(255) NOT NULL,
-             reg_date datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-             PRIMARY KEY (id)
-         ) $charset_collate;";
-
-        // Table for todo list
-        $table_name_todos = $wpdb->prefix . 'todo_list';
-        $sql_todos = "CREATE TABLE $table_name_todos (
-             id mediumint(9) NOT NULL AUTO_INCREMENT,
-             user_id mediumint(9) NOT NULL,
-             task varchar(255) NOT NULL,
-             status varchar(50) DEFAULT 'pending',
-             created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-             PRIMARY KEY (id)
-         ) $charset_collate;";
-
-        require_once (ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql_users);
-        dbDelta($sql_todos);
-
-        // Add the foreign key constraint separately
-        $wpdb->query("ALTER TABLE $table_name_todos ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES $table_name_users(id) ON DELETE CASCADE;");
-    }
 }
 
