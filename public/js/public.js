@@ -87,7 +87,6 @@ jQuery(document).ready(function ($) {
     });
   });
 
-
   // Handle task addition
   $("#todo-form").on("submit", function (e) {
     e.preventDefault();
@@ -118,7 +117,6 @@ jQuery(document).ready(function ($) {
       },
     });
   });
-
 
   // Fetch tasks for the logged-in user
   function fetchTasks() {
@@ -178,7 +176,6 @@ jQuery(document).ready(function ($) {
       },
     });
   }
-
 
   // Handle task update
   $("#todo-list").on("click", ".todo-update-button", function () {

@@ -43,7 +43,10 @@ class Todo_List_Public
                 'ajax_url' => admin_url('admin-ajax.php'), //URL to handle ajex request
                 'login_url' => site_url('/login'),
                 'register_url' => site_url('/register'),
-                'todo_list_url' => site_url('/todo-list')
+                'todo_list_url' => site_url('/todo-list'),
+                'register_nonce' => wp_create_nonce('register_action'),
+                'login_nonce' => wp_create_nonce('login_action'),
+                'add_todo_nonce' => wp_create_nonce('add_todo_action'),
             )
         );
     }
@@ -60,6 +63,7 @@ class Todo_List_Public
             <div class="container__form-container" id="register-form">
                 <h2 class="form-container__title">Register User</h2>
                 <form method="POST" id="register">
+                    <?php wp_nonce_field('register_action', 'register_nonce'); ?>
                     <input type="hidden" name="action" value="register">
                     <div class="form-container__input-group">
                         <label for="register-name" class="input-group__label">Name</label>
@@ -101,7 +105,12 @@ class Todo_List_Public
     //handle registration form submission
     public function handle_registration()
     {
+
         if (isset($_POST['action']) && $_POST['action'] == 'register') {
+            if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'register_action')) {
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                wp_die();
+            }
             $name = sanitize_text_field($_POST['name']);
             $email = sanitize_email($_POST['email']);
             $password = $_POST['password'];
@@ -174,6 +183,7 @@ class Todo_List_Public
             <div class="container__form-container" id="login-form">
                 <h2 class="form-container__title">Login</h2>
                 <form method="POST" id="login">
+                    <?php wp_nonce_field('login_action', 'login_nonce'); ?>
                     <input type="hidden" name="action" value="login">
                     <div class="form-container__input-group">
                         <label for="email" class="input-group__label">Email</label>
@@ -206,6 +216,10 @@ class Todo_List_Public
     public function handle_login()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'login') {
+            if (!isset($_POST['login_nonce']) || !wp_verify_nonce($_POST['login_nonce'], 'login_action')) {
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                wp_die();
+            }
             $email = sanitize_email($_POST['email']);
             $password = $_POST['password'];
 
@@ -261,6 +275,7 @@ class Todo_List_Public
         <div class="todo-container">
             <h1 class="todo-title"><?php echo $user_name; ?>'s Task List</h1>
             <form id="todo-form" class="todo-form">
+                <?php wp_nonce_field('add_todo_action', 'add_todo_nonce'); ?>
                 <input type="hidden" name="action" value="add_todo">
                 <div class="todo-input-group">
                     <input type="text" class="todo-input" id="task" name="task" placeholder="Enter your task" required>
@@ -283,6 +298,10 @@ class Todo_List_Public
     public function handle_add_todo()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'add_todo') {
+            if (!isset($_POST['add_todo_nonce']) || !wp_verify_nonce($_POST['add_todo_nonce'], 'add_todo_action')) {
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                wp_die();
+            }
             if (!$this->is_user_logged_in()) {
                 echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to add a task')));
                 wp_die();
