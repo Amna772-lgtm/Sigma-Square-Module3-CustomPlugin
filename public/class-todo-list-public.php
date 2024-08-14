@@ -47,6 +47,30 @@ class Todo_List_Public
                 'register_nonce' => wp_create_nonce('register_action'),
                 'login_nonce' => wp_create_nonce('login_action'),
                 'add_todo_nonce' => wp_create_nonce('add_todo_action'),
+                'success_messages' => array(
+                    'registration_success' => __('Registration successful. Redirecting to login page...', 'todo-list'),
+                    'login_success' => __('Login successful. Redirecting to todo list page...', 'todo-list')
+                ),
+                'error_messages' => array(
+                    'general_error' => __('An unexpected error occurred. Please try again.', 'todo-list'),
+                    'email_exists' => __('Email already exists. Redirecting to login page...', 'todo-list'),
+                    'registration_error' => __('An error occurred during the registration process. Please try again.', 'todo-list'),
+                    'login_error' => __('An error occurred during the login process. Please try again.', 'todo-list'),
+                    'add_task_error' => __('An error occurred while adding the task. Please try again.', 'todo-list'),
+                    'fetch_tasks_error' => __('An error occurred while fetching the tasks. Please try again.', 'todo-list'),
+                    'update_task_error' => __('An error occurred while updating the task. Please try again.', 'todo-list'),
+                    'missing_task_id' => __('Task ID is missing. Please try again.', 'todo-list'),
+                    'user_not_registered' => __('User not registered. Redirecting to register page...', 'todo-list')
+                ),
+                'status_labels' => array(
+                    'pending' => __('Pending', 'todo-list'),
+                    'in_progress' => __('In Progress', 'todo-list'),
+                    'completed' => __('Completed', 'todo-list')
+                ),
+                'button_labels' => array(
+                    'update' => __('Update', 'todo-list')
+                ),
+                'no_tasks_message' => __('No tasks added', 'todo-list')
             )
         );
     }
@@ -61,37 +85,39 @@ class Todo_List_Public
         ?>
         <div class="container">
             <div class="container__form-container" id="register-form">
-                <h2 class="form-container__title">Register User</h2>
+                <h2 class="form-container__title"><?php _e('Register User', 'todo-list'); ?></h2>
                 <form method="POST" id="register">
                     <?php wp_nonce_field('register_action', 'register_nonce'); ?>
                     <input type="hidden" name="action" value="register">
                     <div class="form-container__input-group">
-                        <label for="register-name" class="input-group__label">Name</label>
-                        <input type="text" class="input-group__input" id="name" name="name" placeholder="Enter your name"
-                            required>
+                        <label for="register-name" class="input-group__label"><?php _e('Name', 'todo-list'); ?></label>
+                        <input type="text" class="input-group__input" id="name" name="name"
+                            placeholder="<?php _e('Enter your name', 'todo-list'); ?>" required>
                         <span id="name-error" class="input-group__error-message"></span>
                     </div>
                     <div class="form-container__input-group">
-                        <label for="register-email" class="input-group__label">Email</label>
-                        <input type="email" class="input-group__input" id="email" name="email" placeholder="abc@gmail.com"
-                            required>
+                        <label for="register-email" class="input-group__label"><?php _e('Email', 'todo-list'); ?></label>
+                        <input type="email" class="input-group__input" id="email" name="email"
+                            placeholder="<?php _e('abc@gmail.com', 'todo-list'); ?>" required>
                         <span id="email-error" class="input-group__error-message"></span>
                     </div>
                     <div class="form-container__input-group">
-                        <label for="register-password" class="input-group__label">Password</label>
+                        <label for="register-password" class="input-group__label"><?php _e('Password', 'todo-list'); ?></label>
                         <input type="password" class="input-group__input" id="password" name="password"
-                            placeholder="Enter your password" required>
+                            placeholder="<?php _e('Enter your password', 'todo-list'); ?>" required>
                         <span id="password-error" class="input-group__error-message"></span>
                     </div>
                     <div class="form-container__input-group">
-                        <label for="register-confpassword" class="input-group__label">Confirm Password</label>
+                        <label for="register-confpassword"
+                            class="input-group__label"><?php _e('Confirm Password', 'todo-list'); ?></label>
                         <input type="password" class="input-group__input" id="confpassword" name="confpassword"
-                            placeholder="Enter password again" required>
+                            placeholder="<?php _e('Enter password again', 'todo-list'); ?>" required>
                         <span id="confpassword-error" class="input-group__error-message"></span>
                     </div>
-                    <button type="submit" class="form-container__button">Register</button>
-                    <p class="register-link">Already have an account? <a href="<?php echo site_url('/login'); ?>"
-                            class="register-link__a">Login</a></p>
+                    <button type="submit" class="form-container__button"><?php _e('Register', 'todo-list'); ?></button>
+                    <p class="register-link"><?php _e('Already have an account?', 'todo-list'); ?> <a
+                            href="<?php echo site_url('/login'); ?>"
+                            class="register-link__a"><?php _e('Login', 'todo-list'); ?></a></p>
                 </form>
             </div>
         </div>
@@ -103,12 +129,12 @@ class Todo_List_Public
 
 
     //handle registration form submission
-    public function handle_registration()
+    public function todo_list_handle_registration()
     {
 
         if (isset($_POST['action']) && $_POST['action'] == 'register') {
             if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'register_action')) {
-                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => __('Nonce verification failed', 'todo-list'))));
                 wp_die();
             }
             $name = sanitize_text_field($_POST['name']);
@@ -120,26 +146,26 @@ class Todo_List_Public
 
             // Input validation
             if (empty($name)) {
-                $errors['name'] = "Name is required";
+                $errors['name'] = __('Name is required', 'todo-list');
             }
 
             if (!is_email($email)) {
-                $errors['email'] = "Please enter a valid email";
+                $errors['email'] = __('Please enter a valid email', 'todo-list');
             }
 
             if (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}:;<>,.?~\\/-]{8,}$/', $password)) {
-                $errors['password'] = "Password must be at least 8 characters long and contain at least one capital letter, one special character, and one number.";
+                $errors['password'] = __('Password must be at least 8 characters long and contain at least one capital letter, one special character, and one number.', 'todo-list');
             }
 
             if ($password !== $confpassword) {
-                $errors['confpassword'] = "Passwords do not match";
+                $errors['confpassword'] = __('Passwords do not match', 'todo-list');
             }
 
             // Check if there are no validation errors
             if (empty($errors)) {
                 // Check if the email already exists
                 if (email_exists($email)) {
-                    $errors['email'] = "Email already exists";
+                    $errors['email'] = __('Email already exists', 'todo-list');
                 } else {
                     // Register the user
                     $user_id = wp_create_user($email, $password, $email);
@@ -181,25 +207,26 @@ class Todo_List_Public
 
         <div class="container">
             <div class="container__form-container" id="login-form">
-                <h2 class="form-container__title">Login</h2>
+                <h2 class="form-container__title"><?php _e('Login', 'todo-list'); ?></h2>
                 <form method="POST" id="login">
                     <?php wp_nonce_field('login_action', 'login_nonce'); ?>
                     <input type="hidden" name="action" value="login">
                     <div class="form-container__input-group">
-                        <label for="email" class="input-group__label">Email</label>
-                        <input type="email" class="input-group__input" id="email" name="email" placeholder="abc@gmail.com"
-                            required>
+                        <label for="email" class="input-group__label"><?php _e('Email', 'todo-list'); ?></label>
+                        <input type="email" class="input-group__input" id="email" name="email"
+                            placeholder="<?php _e('abc@gmail.com', 'todo-list'); ?>" required>
                         <span id="email-error" class="input-group__error-message"></span>
                     </div>
                     <div class="form-container__input-group">
-                        <label for="password" class="input-group__label">Password</label>
+                        <label for="password" class="input-group__label"><?php _e('Password', 'todo-list'); ?></label>
                         <input type="password" class="input-group__input" id="login-password" name="password"
-                            placeholder="Enter your password" required>
+                            placeholder="<?php _e('Enter your password', 'todo-list'); ?>" required>
                         <span id="password-error" class="input-group__error-message"></span>
                     </div>
-                    <button type="submit" class="form-container__button">Login</button>
-                    <p class="register-link">Don't have an account? <a href="<?php echo site_url('/register'); ?>"
-                            class="register-link__a">Register</a>
+                    <button type="submit" class="form-container__button"><?php _e('Login', 'todo-list'); ?></button>
+                    <p class="register-link"><?php _e("Don't have an account?", 'todo-list'); ?> <a
+                            href="<?php echo site_url('/register'); ?>"
+                            class="register-link__a"><?php _e('Register', 'todo-list'); ?></a>
                     </p>
                 </form>
             </div>
@@ -213,11 +240,11 @@ class Todo_List_Public
     /**
      * Function to handle login functionality
      */
-    public function handle_login()
+    public function todo_list_handle_login()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'login') {
             if (!isset($_POST['login_nonce']) || !wp_verify_nonce($_POST['login_nonce'], 'login_action')) {
-                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => __('Nonce verification failed', 'todo-list'))));
                 wp_die();
             }
             $email = sanitize_email($_POST['email']);
@@ -226,11 +253,11 @@ class Todo_List_Public
             $errors = array();
 
             if (!is_email($email)) {
-                $errors['email'] = "Please enter a valid email";
+                $errors['email'] = __('Please enter a valid email', 'todo-list');
             }
 
             if (!preg_match('/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}:;<>,.?~\\/-])[A-Za-z\d!@#$%^&*()_+{}:;<>,.?~\\/-]{8,}$/', $password)) {
-                $errors['password'] = "Password must be at least 8 characters long and contain at least one capital letter, one special character, and one number.";
+                $errors['password'] = __('Password must be at least 8 characters long and contain at least one capital letter, one special character, and one number.', 'todo-list');
             }
 
             if (empty($errors)) {
@@ -243,7 +270,7 @@ class Todo_List_Public
                 );
 
                 if (is_wp_error($user)) {
-                    $errors['email'] = "User not registered or incorrect password";
+                    $errors['email'] = __('User not registered or incorrect password', 'todo-list');
                 } else {
                     // Respond with success
                     echo json_encode(array('success' => true));
@@ -273,13 +300,14 @@ class Todo_List_Public
         ?>
 
         <div class="todo-container">
-            <h1 class="todo-title"><?php echo $user_name; ?>'s Task List</h1>
+            <h1 class="todo-title"><?php echo esc_html($user_name); ?><?php _e("'s Task List", 'todo-list'); ?></h1>
             <form id="todo-form" class="todo-form">
                 <?php wp_nonce_field('add_todo_action', 'add_todo_nonce'); ?>
                 <input type="hidden" name="action" value="add_todo">
                 <div class="todo-input-group">
-                    <input type="text" class="todo-input" id="task" name="task" placeholder="Enter your task" required>
-                    <button type="submit" class="todo-button">Add Task</button>
+                    <input type="text" class="todo-input" id="task" name="task"
+                        placeholder="<?php _e('Enter your task', 'todo-list'); ?>" required>
+                    <button type="submit" class="todo-button"><?php _e('Add Task', 'todo-list'); ?></button>
                 </div>
                 <span id="task-error" class="todo-error-message"></span>
             </form>
@@ -295,15 +323,15 @@ class Todo_List_Public
     /**
      * Handle adding a task
      */
-    public function handle_add_todo()
+    public function todo_list_handle_add_todo()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'add_todo') {
             if (!isset($_POST['add_todo_nonce']) || !wp_verify_nonce($_POST['add_todo_nonce'], 'add_todo_action')) {
-                echo json_encode(array('success' => false, 'errors' => array('nonce' => 'Nonce verification failed')));
+                echo json_encode(array('success' => false, 'errors' => array('nonce' => __('Nonce verification failed', 'todo-list'))));
                 wp_die();
             }
             if (!$this->is_user_logged_in()) {
-                echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to add a task')));
+                echo json_encode(array('success' => false, 'errors' => array('login' => __('You must be logged in to add a task', 'todo-list'))));
                 wp_die();
             }
 
@@ -311,7 +339,7 @@ class Todo_List_Public
             $user_id = $this->get_logged_in_user_id();
 
             if (empty($task)) {
-                echo json_encode(array('success' => false, 'errors' => array('task' => 'Task is required')));
+                echo json_encode(array('success' => false, 'errors' => array('task' => __('Task is required', 'todo-list'))));
                 wp_die();
             }
 
@@ -336,11 +364,11 @@ class Todo_List_Public
     /**
      * Fetch tasks for the logged-in user
      */
-    public function fetch_tasks()
+    public function todo_list_fetch_tasks()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'fetch_tasks') {
             if (!$this->is_user_logged_in()) {
-                echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to fetch tasks')));
+                echo json_encode(array('success' => false, 'errors' => array('login' => __('You must be logged in to fetch tasks', 'todo-list'))));
                 wp_die();
             }
 
@@ -360,11 +388,11 @@ class Todo_List_Public
     /**
      * Handle updating a task
      */
-    public function handle_update_todo()
+    public function todo_list_handle_update_todo()
     {
         if (isset($_POST['action']) && $_POST['action'] == 'update_todo') {
             if (!$this->is_user_logged_in()) {
-                echo json_encode(array('success' => false, 'errors' => array('login' => 'You must be logged in to update a task')));
+                echo json_encode(array('success' => false, 'errors' => array('login' => __('You must be logged in to update a task', 'todo-list'))));
                 wp_die();
             }
 
@@ -393,7 +421,7 @@ class Todo_List_Public
                 update_user_meta($user_id, 'todo_tasks', $tasks);
                 echo json_encode(array('success' => true));
             } else {
-                echo json_encode(array('success' => false, 'errors' => array('task' => 'Task not found')));
+                echo json_encode(array('success' => false, 'errors' => array('task' => __('Task not found', 'todo-list'))));
             }
             wp_die();
         }

@@ -11,21 +11,23 @@ jQuery(document).ready(function ($) {
           response = JSON.parse(response);
         } catch (e) {
           console.error("Failed to parse response JSON:", response);
-          alert("An unexpected error occurred. Please try again.");
+          alert(todolist_vars.error_messages.general_error);
           return;
         }
 
         $(".input-group__error-message").text(""); // Clear previous errors
 
         if (response.success) {
-          alert("Registration successful. Redirecting to login page...");
+          alert(todolist_vars.success_messages.registration_success);
           window.location.href = todolist_vars.login_url;
         } else {
           if (
             response.errors.email &&
-            response.errors.email.includes("Email already exists")
+            response.errors.email.includes(
+              todolist_vars.error_messages.email_exists
+            )
           ) {
-            alert("Email already exists. Redirecting to login page...");
+            alert(todolist_vars.error_messages.email_exists);
             window.location.href = todolist_vars.login_url;
           }
 
@@ -38,9 +40,7 @@ jQuery(document).ready(function ($) {
       //xhr object represents the AJAX request and contains information about the request
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-        alert(
-          "An error occurred during the registration process. Please try again."
-        );
+        alert(todolist_vars.error_messages.registration_error);
       },
     });
   });
@@ -58,12 +58,12 @@ jQuery(document).ready(function ($) {
           response = JSON.parse(response);
         } catch (e) {
           console.error("Failed to parse response JSON:", response);
-          alert("An unexpected error occurred. Please try again.");
+          alert(todolist_vars.error_messages.general_error);
           return;
         }
 
         if (response.success) {
-          alert("Login successful. Redirecting to todo list page...");
+          alert(todolist_vars.success_messages.login_success);
           window.location.href = todolist_vars.todo_list_url;
         } else {
           // Display errors under respective fields
@@ -73,16 +73,18 @@ jQuery(document).ready(function ($) {
 
           if (
             response.errors.email &&
-            response.errors.email.includes("User not registered")
+            response.errors.email.includes(
+              todolist_vars.error_messages.user_not_registered
+            )
           ) {
-            alert("User not registered. Redirecting to register page...");
+            alert(todolist_vars.error_messages.user_not_registered);
             window.location.href = todolist_vars.register_url;
           }
         }
       },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-        alert("An error occurred during the login process. Please try again.");
+        alert(todolist_vars.error_messages.login_error);
       },
     });
   });
@@ -99,7 +101,7 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert("An unexpected error occurred. Please try again.");
+          alert(todolist_vars.error_messages.general_error);
           return;
         }
 
@@ -113,7 +115,7 @@ jQuery(document).ready(function ($) {
         }
       },
       error: function (xhr, status, error) {
-        alert("An error occurred while adding the task. Please try again.");
+        alert(todolist_vars.error_messages.add_task_error);
       },
     });
   });
@@ -128,7 +130,7 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert("An unexpected error occurred. Please try again.");
+          alert(todolist_vars.error_messages.general_error);
           return;
         }
 
@@ -152,27 +154,31 @@ jQuery(document).ready(function ($) {
                           <select class="todo-status">
                             <option value="pending" ${
                               task.status === "pending" ? "selected" : ""
-                            }>Pending</option>
+                            }>${todolist_vars.status_labels.pending}</option>
                             <option value="in progress" ${
                               task.status === "in progress" ? "selected" : ""
-                            }>In Progress</option>
+                            }>${
+                todolist_vars.status_labels.in_progress
+              }</option>
                             <option value="completed" ${
                               task.status === "completed" ? "selected" : ""
-                            }>Completed</option>
+                            }>${todolist_vars.status_labels.completed}</option>
                           </select>
-                          <button class="todo-update-button">Update</button>
+                          <button class="todo-update-button">${
+                            todolist_vars.button_labels.update
+                          }</button>
                         </div>
                       </div>
                     `;
               taskList.append(taskHtml);
             });
           } else {
-            taskList.append("<p>No tasks added</p>");
+            taskList.append(todolist_vars.no_tasks_message);
           }
         }
       },
       error: function (xhr, status, error) {
-        alert("An error occurred while fetching the tasks. Please try again.");
+        alert(todolist_vars.error_messages.fetch_tasks_error);
       },
     });
   }
@@ -184,7 +190,7 @@ jQuery(document).ready(function ($) {
 
     if (taskId === undefined || taskId === null) {
       //console.error("Task ID is undefined or null");
-      //alert("Task ID is missing. Please try again.");
+      //alert(todolist_vars.error_messages.missing_task_id);
       //return;
     }
 
@@ -202,14 +208,14 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert("An unexpected error occurred. Please try again.");
+          alert(todolist_vars.error_messages.general_error);
           return;
         }
 
         if (response.success) {
           fetchTasks(); // Refresh the task list
         } else {
-          alert("An error occurred while updating the task. Please try again.");
+          alert(todolist_vars.error_messages.update_task_error);
         }
       },
       error: function (xhr, status, error) {

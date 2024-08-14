@@ -26,29 +26,6 @@
  define ( 'TODO_LIST_VERSION', '1.0.0' );
 
 
-/**
-*code runs during plugin activation
-*/
- function activate_todo_list() {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-todo-list-activator.php';
-    Todo_List_Activator::activate();
- }
-
-
- 
-/**
-*code runs during plugin deactivation
-*/
-function deactivate_todo_list() {
-    require_once plugin_dir_path(__FILE__) . 'includes/class-todo-list-deactivator.php';
-    Todo_List_Deactivator::deactivate();
- }
-
-
- register_activation_hook(__FILE__, 'activate_todo_list');
- register_deactivation_hook(__FILE__, 'deactivate_todo_list');
-
-
  /**
   * Core plugin class used to define internationalization, 
   * admin specific hooks and public site hooks
