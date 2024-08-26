@@ -78,13 +78,17 @@ class Todo_List_Public
     //registration form
     public function registration_form()
     {
-
+        if ($this->is_user_logged_in()) {
+            wp_redirect(site_url('/todo-list'));
+            exit;
+        }
         //start output buffering, PHP will store all output in an internal buffer instead of sending it directly to the browser
         ob_start();
 
         ?>
         <div class="container">
             <div class="container__form-container" id="register-form">
+                <div id="message-box" class="message-box"></div>
                 <h2 class="form-container__title"><?php _e('Register User', 'todo-list'); ?></h2>
                 <form method="POST" id="register">
                     <?php wp_nonce_field('register_action', 'register_nonce'); ?>
@@ -200,6 +204,10 @@ class Todo_List_Public
      */
     public function login_form()
     {
+        if ($this->is_user_logged_in()) {
+            wp_redirect(site_url('/todo-list'));
+            exit;
+        }
 
         ob_start();
 
@@ -207,6 +215,7 @@ class Todo_List_Public
 
         <div class="container">
             <div class="container__form-container" id="login-form">
+                <div id="message-box" class="message-box"></div>
                 <h2 class="form-container__title"><?php _e('Login', 'todo-list'); ?></h2>
                 <form method="POST" id="login">
                     <?php wp_nonce_field('login_action', 'login_nonce'); ?>
@@ -291,6 +300,10 @@ class Todo_List_Public
      */
     public function todo_list_form()
     {
+        if (!$this->is_user_logged_in()) {
+            wp_redirect(site_url('/login'));
+            exit;
+        }
         ob_start();
 
         // Fetch the logged-in user's name
@@ -300,6 +313,7 @@ class Todo_List_Public
         ?>
 
         <div class="todo-container">
+            <div id="message-box" class="message-box"></div>
             <h1 class="todo-title"><?php echo esc_html($user_name); ?><?php _e("'s Task List", 'todo-list'); ?></h1>
             <form id="todo-form" class="todo-form">
                 <?php wp_nonce_field('add_todo_action', 'add_todo_nonce'); ?>
@@ -427,6 +441,61 @@ class Todo_List_Public
         }
     }
 
+    // Register the REST API endpoint
+    function todo_list_register_api_endpoint()
+    {
+        register_rest_route('todo-list/v1', '/user/api/', [
+            'methods' => 'GET',
+            'callback' => 'get_user_todo_list',
+            'permission_callback' => function () {
+                // Check if the user is logged in
+                if (!is_user_logged_in()) {
+                    return new WP_Error('rest_forbidden', __('You must be logged in to view this data.', 'todo-list'), array('status' => 403));
+                }
+                // Permission check passed
+                return true;
+            },
+        ]);
+    }
+
+    function get_user_todo_list()
+    {
+        echo json_encode(['message' => 'api created']);
+        exit;
+    }
+
+    /*function get_user_todo_list($data)
+    {
+        $user_id = $data['user_id'];
+
+        // Check if the user is logged in and matches the user_id (for added security)
+        if (!is_user_logged_in() || get_current_user_id() != $user_id) {
+            return new WP_Error('rest_forbidden', __('You are not authorized to view this data.', 'todo-list'), array('status' => 403));
+        }
+
+        // Retrieve all user meta data for the given user_id
+        $todo_items = get_user_meta($user_id);
+
+        if (empty($todo_items)) {
+            return new WP_REST_Response(array('message' => 'To-do list not added'), 404);
+        }
+
+        // Process the results if necessary
+        $formatted_todo_items = array();
+        foreach ($todo_items as $meta_key => $meta_values) {
+            foreach ($meta_values as $meta_value) {
+                // Assuming 'todo_' prefix for to-do items, adjust as necessary
+                if (strpos($meta_key, 'todo_') === 0) {
+                    $formatted_todo_items[] = array(
+                        'meta_key' => $meta_key,
+                        'meta_value' => $meta_value
+                    );
+                }
+            }
+        }
+
+        return new WP_REST_Response($formatted_todo_items, 200);
+    }*/
 
 }
 

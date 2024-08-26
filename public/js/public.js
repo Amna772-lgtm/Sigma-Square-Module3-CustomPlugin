@@ -1,3 +1,16 @@
+function showMessage(type, message) {
+  const messageBox = document.getElementById('message-box');
+  messageBox.classList.remove("success", "error"); // Remove classes
+  messageBox.classList.add(type); // Add the appropriate class
+  messageBox.textContent = message; // Set the text content
+  messageBox.style.display = 'block'; // Show the message box
+
+  setTimeout(function () {
+    messageBox.style.display = 'none'; // Hide the message box after 2 seconds
+  }, 2000); // Adjust time as needed
+}
+
+
 jQuery(document).ready(function ($) {
   $("#register").on("submit", function (e) {
     e.preventDefault();
@@ -11,15 +24,20 @@ jQuery(document).ready(function ($) {
           response = JSON.parse(response);
         } catch (e) {
           console.error("Failed to parse response JSON:", response);
-          alert(todolist_vars.error_messages.general_error);
+          showMessage("error", todolist_vars.error_messages.general_error);
           return;
         }
 
         $(".input-group__error-message").text(""); // Clear previous errors
 
         if (response.success) {
-          alert(todolist_vars.success_messages.registration_success);
-          window.location.href = todolist_vars.login_url;
+          showMessage(
+            "success",
+            todolist_vars.success_messages.registration_success
+          );
+          setTimeout(function () {
+            window.location.href = todolist_vars.login_url;
+          }, 2000);
         } else {
           if (
             response.errors.email &&
@@ -27,8 +45,10 @@ jQuery(document).ready(function ($) {
               todolist_vars.error_messages.email_exists
             )
           ) {
-            alert(todolist_vars.error_messages.email_exists);
-            window.location.href = todolist_vars.login_url;
+            showMessage("error", todolist_vars.error_messages.email_exists);
+            setTimeout(function () {
+              window.location.href = todolist_vars.login_url;
+            }, 2000);
           }
 
           // Display errors under respective fields
@@ -40,7 +60,7 @@ jQuery(document).ready(function ($) {
       //xhr object represents the AJAX request and contains information about the request
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-        alert(todolist_vars.error_messages.registration_error);
+        showMessage("error", todolist_vars.error_messages.registration_error);
       },
     });
   });
@@ -58,13 +78,15 @@ jQuery(document).ready(function ($) {
           response = JSON.parse(response);
         } catch (e) {
           console.error("Failed to parse response JSON:", response);
-          alert(todolist_vars.error_messages.general_error);
+          showMessage("error", todolist_vars.error_messages.general_error);
           return;
         }
 
         if (response.success) {
-          alert(todolist_vars.success_messages.login_success);
-          window.location.href = todolist_vars.todo_list_url;
+          showMessage("success", todolist_vars.success_messages.login_success);
+          setTimeout(function () {
+            window.location.href = todolist_vars.todo_list_url;
+          }, 2000);
         } else {
           // Display errors under respective fields
           for (let key in response.errors) {
@@ -77,14 +99,19 @@ jQuery(document).ready(function ($) {
               todolist_vars.error_messages.user_not_registered
             )
           ) {
-            alert(todolist_vars.error_messages.user_not_registered);
-            window.location.href = todolist_vars.register_url;
+            showMessage(
+              "error",
+              todolist_vars.error_messages.user_not_registered
+            );
+            setTimeout(function () {
+              window.location.href = todolist_vars.register_url;
+            }, 2000);
           }
         }
       },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-        alert(todolist_vars.error_messages.login_error);
+        showMessage("error", todolist_vars.error_messages.login_error);
       },
     });
   });
@@ -101,7 +128,7 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert(todolist_vars.error_messages.general_error);
+          showMessage("error", todolist_vars.error_messages.general_error);
           return;
         }
 
@@ -115,7 +142,7 @@ jQuery(document).ready(function ($) {
         }
       },
       error: function (xhr, status, error) {
-        alert(todolist_vars.error_messages.add_task_error);
+        showMessage('error', todolist_vars.error_messages.add_task_error);
       },
     });
   });
@@ -130,7 +157,7 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert(todolist_vars.error_messages.general_error);
+          showMessage("error", todolist_vars.error_messages.general_error);
           return;
         }
 
@@ -178,7 +205,7 @@ jQuery(document).ready(function ($) {
         }
       },
       error: function (xhr, status, error) {
-        alert(todolist_vars.error_messages.fetch_tasks_error);
+        //alert(todolist_vars.error_messages.fetch_tasks_error);
       },
     });
   }
@@ -208,19 +235,19 @@ jQuery(document).ready(function ($) {
         try {
           response = JSON.parse(response);
         } catch (e) {
-          alert(todolist_vars.error_messages.general_error);
+          showMessage("error", todolist_vars.error_messages.general_error);
           return;
         }
 
         if (response.success) {
           fetchTasks(); // Refresh the task list
         } else {
-          alert(todolist_vars.error_messages.update_task_error);
+          showMessage('error', todolist_vars.error_messages.update_task_error);
         }
       },
       error: function (xhr, status, error) {
         console.error("AJAX Error:", status, error);
-        alert("An error occurred while updating the task. Please try again.");
+        showMessage('error', todolist_vars.error_messages.update_task_error);
       },
     });
   });
