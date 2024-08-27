@@ -62,8 +62,11 @@ class Todo_List
         // Update Todo list AJAX actions
         add_action('wp_ajax_update_todo', array($plugin_public, 'todo_list_handle_update_todo'));
 
-        //rest api endpoint
+        //rest api endpoint for user tasks
         add_action('rest_api_init', array($plugin_public, 'todo_list_register_api_endpoint'));
+
+        //rest api endpoint for task_id
+        add_action('rest_api_init', array($plugin_public, 'todo_list_register_task_id_api_endpoint'));
 
     }
     

@@ -441,7 +441,10 @@ class Todo_List_Public
         }
     }
 
-    // Function to register the REST API route
+    /**
+     * Rest API that take user id as parameter and 
+     * display list of his/her tasks that he/she added
+     */
     public function todo_list_register_api_endpoint()
     {
         register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)', [
@@ -458,7 +461,9 @@ class Todo_List_Public
     }
 
 
-    // Callback function to handle the REST API request.
+    /**
+     * Callback function for above API
+     */
     public function get_user_todo_list($data)
     {
         // Get the user ID from the URL parameter
@@ -477,18 +482,10 @@ class Todo_List_Public
             // Check if tasks are already an array
             $tasks = is_array($user_tasks) ? $user_tasks : [];
 
-            // Filter out the task and status only
-            $filtered_tasks = array_map(function ($task) {
-                return [
-                    'task' => $task['task'],
-                    'status' => $task['status']
-                ];
-            }, $tasks);
-
             // Prepare the response
             $response = [
                 'user_name' => $user_name,
-                'tasks' => $filtered_tasks
+                'tasks' => $tasks
             ];
         } else {
             // Return an error message if the user doesn't exist
@@ -499,6 +496,75 @@ class Todo_List_Public
         wp_send_json($response);
         exit;
     }
+
+
+
+    /**
+     * Rest API that take userid, task, status as parameter
+     * and display respective task_id
+     */
+    public function todo_list_register_task_id_api_endpoint()
+    {
+        register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)/(?P<task>[^/]+)/(?P<status>[^/]+)', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_task_id_by_parameters'],
+            'args' => [
+                'user_id' => [
+                    'required' => true,
+                    'validate_callback' => function ($param, $request, $key) {
+                        return is_numeric($param);
+                    }
+                ],
+                'task' => [
+                    'required' => true,
+                ],
+                'status' => [
+                    'required' => true,
+                ]
+            ]
+        ]);
+    }
+
+
+    /**
+     * Callback function for above rest api
+     */
+
+    public function get_task_id_by_parameters($data)
+    {
+        // Get the parameters from the URL
+        $user_id = $data['user_id'];
+        $task_param = urldecode($data['task']); // Decode the URL-encoded task name
+        $status_param = urldecode($data['status']); // Decode the URL-encoded status
+
+        // Get the user's tasks from the wp_usermeta table
+        $user_tasks = get_user_meta($user_id, 'todo_tasks', true);
+
+        // Check if tasks are already an array
+        $tasks = is_array($user_tasks) ? $user_tasks : [];
+
+        // Search for the task with the matching task and status
+        $task_id = null;
+        foreach ($tasks as $task) {
+            if ($task['task'] === $task_param && $task['status'] === $status_param) {
+                $task_id = $task['id'];
+                break;
+            }
+        }
+
+        if ($task_id !== null) {
+            // Return the task_id in the JSON response
+            $response = ['task_id' => $task_id];
+        } else {
+            // Return an error message if no matching task is found
+            $response = ['error' => 'Task not found'];
+        }
+
+        // Return JSON response
+        wp_send_json($response);
+        exit;
+    }
+
 
 }
 
