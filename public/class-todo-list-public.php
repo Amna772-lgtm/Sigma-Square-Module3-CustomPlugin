@@ -441,61 +441,64 @@ class Todo_List_Public
         }
     }
 
-    // Register the REST API endpoint
-    function todo_list_register_api_endpoint()
+    // Function to register the REST API route
+    public function todo_list_register_api_endpoint()
     {
-        register_rest_route('todo-list/v1', '/user/api/', [
+        register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)', [
             'methods' => 'GET',
-            'callback' => 'get_user_todo_list',
-            'permission_callback' => function () {
-                // Check if the user is logged in
-                if (!is_user_logged_in()) {
-                    return new WP_Error('rest_forbidden', __('You must be logged in to view this data.', 'todo-list'), array('status' => 403));
-                }
-                // Permission check passed
-                return true;
-            },
+            'callback' => [$this, 'get_user_todo_list'],
+            'args' => [
+                'user_id' => [
+                    'validate_callback' => function ($param, $request, $key) {
+                        return is_numeric($param);
+                    }
+                ],
+            ],
         ]);
     }
 
-    function get_user_todo_list()
-    {
-        echo json_encode(['message' => 'api created']);
-        exit;
-    }
 
-    /*function get_user_todo_list($data)
+    // Callback function to handle the REST API request.
+    public function get_user_todo_list($data)
     {
+        // Get the user ID from the URL parameter
         $user_id = $data['user_id'];
 
-        // Check if the user is logged in and matches the user_id (for added security)
-        if (!is_user_logged_in() || get_current_user_id() != $user_id) {
-            return new WP_Error('rest_forbidden', __('You are not authorized to view this data.', 'todo-list'), array('status' => 403));
+        // Get the user data
+        $user_info = get_userdata($user_id);
+
+        if ($user_info) {
+            // Get the user's display name
+            $user_name = $user_info->display_name;
+
+            // Get the user's tasks from the wp_usermeta table
+            $user_tasks = get_user_meta($user_id, 'todo_tasks', true);
+
+            // Check if tasks are already an array
+            $tasks = is_array($user_tasks) ? $user_tasks : [];
+
+            // Filter out the task and status only
+            $filtered_tasks = array_map(function ($task) {
+                return [
+                    'task' => $task['task'],
+                    'status' => $task['status']
+                ];
+            }, $tasks);
+
+            // Prepare the response
+            $response = [
+                'user_name' => $user_name,
+                'tasks' => $filtered_tasks
+            ];
+        } else {
+            // Return an error message if the user doesn't exist
+            $response = ['error' => 'User not found'];
         }
 
-        // Retrieve all user meta data for the given user_id
-        $todo_items = get_user_meta($user_id);
-
-        if (empty($todo_items)) {
-            return new WP_REST_Response(array('message' => 'To-do list not added'), 404);
-        }
-
-        // Process the results if necessary
-        $formatted_todo_items = array();
-        foreach ($todo_items as $meta_key => $meta_values) {
-            foreach ($meta_values as $meta_value) {
-                // Assuming 'todo_' prefix for to-do items, adjust as necessary
-                if (strpos($meta_key, 'todo_') === 0) {
-                    $formatted_todo_items[] = array(
-                        'meta_key' => $meta_key,
-                        'meta_value' => $meta_value
-                    );
-                }
-            }
-        }
-
-        return new WP_REST_Response($formatted_todo_items, 200);
-    }*/
+        // Return JSON response
+        wp_send_json($response);
+        exit;
+    }
 
 }
 
