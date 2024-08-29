@@ -68,6 +68,10 @@ class Todo_List
         //rest api endpoint for task_id
         add_action('rest_api_init', array($plugin_public, 'todo_list_register_task_id_api_endpoint'));
 
+        //rest api endpoint for check task 
+        add_action('rest_api_init', array($plugin_public, 'todo_list_register_check_task_api_endpoint'));
+
+        
     }
     
     public function run()
