@@ -1,10 +1,13 @@
-# Custom Todo List Plugin
+# Custom To-Do List Plugin
+
 A comprehensive WordPress plugin for managing personal tasks and to-do lists with user registration and login functionalities.
 
-# Motivation
-As an intern at a software house, I was assigned a task to develop a custom WordPress plugin as part of my training in plugin development. This project provided an opportunity to dive deep into WordPress's extensive plugin architecture, enhance my skills in PHP, JavaScript, and MySQL, and contribute to a real-world application. The goal was to create a functional and user-friendly todo list plugin that allows users to manage tasks efficiently, with the added challenge of implementing secure user registration and login features. This experience not only strengthened my technical capabilities but also gave me valuable insights into the development process within a professional environment.
+## Motivation
+
+As an intern at a software house, I was assigned a task to develop a custom WordPress plugin as part of my training in plugin development. This project provided an opportunity to dive deep into WordPress's extensive plugin architecture, enhance my skills in PHP, JavaScript, and MySQL, and contribute to a real-world application. The goal was to create a functional and user-friendly to-do list plugin that allows users to manage tasks efficiently, with the added challenge of implementing secure user registration and login features. This experience not only strengthened my technical capabilities but also gave me valuable insights into the development process within a professional environment.
 
 ## Code Style
+
 This plugin follows standard WordPress coding practices to ensure readability, maintainability, and compatibility with other WordPress plugins and themes. Key aspects of the code style include:
 
 - **PHP Coding Standards:** All PHP code is written following the [WordPress PHP Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/). This includes proper indentation, naming conventions, and documentation.
@@ -13,12 +16,13 @@ This plugin follows standard WordPress coding practices to ensure readability, m
 
 - **JavaScript:** JavaScript is written following the [WordPress JavaScript Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/javascript/). jQuery is used for DOM manipulation, and care is taken to avoid conflicts with other plugins.
 
-- **Security Best Practices:** The plugin code is written with security in mind, including proper data sanitization, validation, and escaping to prevent vulnerabilities such as SQL injection, XSS.
+- **Security Best Practices:** The plugin code is written with security in mind, including proper data sanitization, validation, and escaping to prevent vulnerabilities such as SQL injection and XSS.
 
 - **Version Control:** The project is maintained under version control using Git, with clear commit messages and branching strategies to ensure a clean development process.
 
-# Video Tutorial
-[Video Link](https://drive.google.com/file/d/1yn2BPCqnTXlaYvOsxJvhck3e4BeCB-3Z/view?usp=drive_link)
+## Video Tutorial
+
+[Watch the Video Tutorial](https://drive.google.com/file/d/1yn2BPCqnTXlaYvOsxJvhck3e4BeCB-3Z/view?usp=drive_link)
 
 ## Tech/Framework Used
 
@@ -27,8 +31,6 @@ This Custom To-Do List Plugin leverages several technologies and frameworks to e
 - **WordPress:** The plugin is built for WordPress, utilizing its rich set of APIs and hooks to integrate with the WordPress ecosystem.
 
 - **PHP:** The server-side scripting language used to create the core functionalities of the plugin. It adheres to WordPress PHP Coding Standards for consistency and readability.
-
-- **MySQL:** The database management system used to store and manage plugin data, such as user to-do lists and tasks.
 
 - **JavaScript:** Employed to enhance user interactions and manage dynamic content on the client side. JavaScript is used in combination with jQuery to provide a responsive and interactive user experience.
 
@@ -44,4 +46,42 @@ This Custom To-Do List Plugin leverages several technologies and frameworks to e
 
 - **WordPress Shortcodes API:** Allows for embedding plugin functionality into posts, pages, or widgets via shortcodes.
 
-These technologies collectively ensure that the plugin is functional, scalable, and compatible with WordPress themes and other plugins.
+## Features
+
+### User Registration and Login
+- **Registration Form:** Users can register with their name, email, and password. Duplicate users are detected, and appropriate messages are displayed.
+- **Login Form:** Users can log in with their credentials. Successful login redirects to the To-Do List page.
+
+### To-Do List Management
+- **Add Tasks:** Create new tasks with titles.
+- **Mark Tasks as Complete:** Update task status to completed.
+
+### User-Specific Task Management
+- **Personalized Lists:** Each user has their own to-do list.
+- **Individual Task Views:** Ensure privacy with user-specific tasks.
+
+### Admin Features
+- **User Management:** Admins can view and manage all users and their tasks.
+- **Task Overview:** Admins get a comprehensive view of tasks across the platform.
+
+### Nonce Verification
+- **Security Measures:** Utilizes nonce verification to secure form submissions and AJAX requests.
+
+### AJAX Integration
+- **Real-Time Updates:** AJAX enables task operations without page reloads.
+- **Seamless User Experience:** Provides instant feedback and improved interaction.
+
+## Installation
+
+1. Download the plugin ZIP file.
+2. In your WordPress admin panel, go to **Plugins > Add New**.
+3. Click **Upload Plugin** and choose the downloaded ZIP file.
+4. Click **Install Now** and then **Activate**.
+
+## Contributing
+
+Feel free to contribute to this project by submitting issues or pull requests. Please follow the code style guidelines and ensure all changes are well-documented.
+
+## Contact
+
+For any questions or feedback, please contact Amna Rani at [amnarani338@gmail.com].
