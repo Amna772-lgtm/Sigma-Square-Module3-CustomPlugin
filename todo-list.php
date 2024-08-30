@@ -17,27 +17,35 @@
 
 
 //if this php file is accessed directly using url, stop the execution.
- if(! defined ( 'WPINC' )) {
-    die;
- }
+if (!defined('WPINC')) {
+  die;
+}
 
 
- //define constants
- define ( 'TODO_LIST_VERSION', '1.0.0' );
+//define constants
+define('TODO_LIST_VERSION', '1.0.0');
 
 
- /**
-  * Core plugin class used to define internationalization, 
-  * admin specific hooks and public site hooks
-  */
-  require_once plugin_dir_path(__FILE__) . 'includes/class-todo-list.php';
+/**
+ * Core plugin class used to define internationalization, 
+ * admin specific hooks and public site hooks
+ */
+require_once plugin_dir_path(__FILE__) . 'includes/class-todo-list.php';
 
+//include WP CLI command file
+include_once plugin_dir_path( __FILE__ ) . 'includes/class-todo-list-wpcli-command.php';
 
-  /**
-   * execution of plugin starts
-   */
-  function run_todo_list() {
-    $plugin = new Todo_List();
-    $plugin->run();
-  }
-  run_todo_list();
+// Register the WP-CLI command
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+  WP_CLI::add_command( 'todo', 'WP_CLI_Todo_Command' );
+}
+
+/**
+ * execution of plugin starts
+ */
+function run_todo_list()
+{
+  $plugin = new Todo_List();
+  $plugin->run();
+}
+run_todo_list();

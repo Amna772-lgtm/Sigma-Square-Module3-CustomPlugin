@@ -71,6 +71,48 @@ This Custom To-Do List Plugin leverages several technologies and frameworks to e
 - **Real-Time Updates:** AJAX enables task operations without page reloads.
 - **Seamless User Experience:** Provides instant feedback and improved interaction.
 
+### WP-CLI Commands
+
+This plugin includes custom WP-CLI commands to manage tasks from the command line interface.
+
+#### Available Commands
+
+##### `wp todo add_task`
+
+- **Description:** Adds a new task to the specified user's to-do list. If no user ID is provided, the task will be added to the currently logged-in user's list.
+- **Usage:** `wp todo add_task "Task Description" [--user=<user_id>]`
+- **Example:**
+  ```bash
+  wp todo add_task "Complete project report" --user=1
+
+##### `wp todo fetch_task`
+
+- **Description:** Fetches and displays the to-do tasks for the specified user. If no user ID is provided, it fetches tasks for the currently logged-in user.
+- **Usage:** `wp todo fetch_tasks [<user_id>]`
+- **Example:**
+  ```bash
+  wp todo fetch_tasks --user=1
+
+
+##### `wp todo update_task`
+
+- **Description:** Updates the status of a specified task for the currently logged-in user.
+- **Usage:** `wp todo update_task <task_id> --status=<status> [<user_id>]`
+- **Example:**
+  ```bash
+  wp todo update_task 1-66d15d7036b5f --status=completed --user=1
+
+#### Requirements
+
+- **WP-CLI:** Ensure WP-CLI is installed on your system. You can find installation instructions and download WP-CLI from [wp-cli.org](https://wp-cli.org/).
+
+#### Usage
+
+1. **Open your terminal or command line interface.**
+2. **Navigate to the WordPress root directory.** 
+3. **Run the desired WP CLI commands.**
+
+
 ## Installation
 
 1. Download the plugin ZIP file.
