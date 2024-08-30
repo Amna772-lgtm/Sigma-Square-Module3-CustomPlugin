@@ -20,9 +20,13 @@ This plugin follows standard WordPress coding practices to ensure readability, m
 
 - **Version Control:** The project is maintained under version control using Git, with clear commit messages and branching strategies to ensure a clean development process.
 
-## Video Tutorial
+## Video Tutorials
 
-[Watch the Video Tutorial](https://drive.google.com/file/d/1yn2BPCqnTXlaYvOsxJvhck3e4BeCB-3Z/view?usp=drive_link)
+[Todo List Video](https://drive.google.com/file/d/1P1bVNXa4UbQ7JGPU_gidMEkb483_lrnA/view?usp=drive_link)
+
+[Rest API Video](https://drive.google.com/file/d/1P1bVNXa4UbQ7JGPU_gidMEkb483_lrnA/view?usp=drive_link)
+
+[WP CLI Custom Commands Video](https://drive.google.com/file/d/1shjpVzCGhTTG0X0zGVZVM-zCt1eeG3Pc/view?usp=drive_link)
 
 ## Tech/Framework Used
 
