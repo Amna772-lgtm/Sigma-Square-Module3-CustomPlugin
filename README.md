@@ -116,6 +116,15 @@ This plugin includes custom WP-CLI commands to manage tasks from the command lin
 2. **Navigate to the WordPress root directory.** 
 3. **Run the desired WP CLI commands.**
 
+### Task Scheduler
+The Task Scheduler feature allows users to set reminders for their tasks, ensuring they stay on track with their to-do list. This feature utilizes WordPress's built-in scheduling functions to handle task reminders efficiently.
+
+1. **Schedule Reminders:** 
+Users can set reminders for tasks, which will be triggered based on the scheduled time.
+2. **Email Notifications:** 
+Users receive email notifications for upcoming tasks.
+3. **Manage Scheduled Tasks:**
+Admins can view and manage all scheduled tasks and reminders.
 
 ## Installation
 

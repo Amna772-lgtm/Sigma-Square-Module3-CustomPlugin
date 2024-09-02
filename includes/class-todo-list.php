@@ -21,8 +21,9 @@ class Todo_List
     private function load_dependencies()
     {
         // Include all files
-        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-todo-list-admin.php';
-        require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-todo-list-public.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-admin.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-public.php';
+        require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-shortcodes.php';
     }
 
     private function define_admin_hooks()
@@ -36,14 +37,15 @@ class Todo_List
     private function define_public_hooks()
     {
         $plugin_public = new Todo_List_Public();
+        $plugin_shortcodes = new Shortcodes($plugin_public);
 
         add_action('wp_enqueue_scripts', array($plugin_public, 'enqueue_styles'));
         add_action('wp_enqueue_scripts', array($plugin_public, 'enqueue_scripts'));
 
-        // Add shortcodes of login, registration, and todo-list forms
-        add_shortcode('todo_list_registration_form', array($plugin_public, 'registration_form'));
-        add_shortcode('todo_list_login_form', array($plugin_public, 'login_form'));
-        add_shortcode('todo_list_form', array($plugin_public, 'todo_list_form'));
+        // Register shortcodes
+        add_shortcode('todo_list_registration_form', array($plugin_shortcodes, 'registration_form'));
+        add_shortcode('todo_list_login_form', array($plugin_shortcodes, 'login_form'));
+        add_shortcode('todo_list_form', array($plugin_shortcodes, 'todo_list_form'));
 
         // Register AJAX actions 
         add_action('wp_ajax_register', array($plugin_public, 'todo_list_handle_registration'));
@@ -62,15 +64,8 @@ class Todo_List
         // Update Todo list AJAX actions
         add_action('wp_ajax_update_todo', array($plugin_public, 'todo_list_handle_update_todo'));
 
-        //rest api endpoint for user tasks
-        add_action('rest_api_init', array($plugin_public, 'todo_list_register_api_endpoint'));
-
-        //rest api endpoint for task_id
-        add_action('rest_api_init', array($plugin_public, 'todo_list_register_task_id_api_endpoint'));
-
-        //rest api endpoint for check task 
-        add_action('rest_api_init', array($plugin_public, 'todo_list_register_check_task_api_endpoint'));
-
+        // Cron job for pending tasks reminder
+        add_action('todo_list_task_reminder', array($plugin_public, 'todo_list_send_task_reminder_email'));
         
     }
     
