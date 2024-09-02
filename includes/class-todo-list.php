@@ -63,9 +63,6 @@ class Todo_List
 
         // Update Todo list AJAX actions
         add_action('wp_ajax_update_todo', array($plugin_public, 'todo_list_handle_update_todo'));
-
-        // Cron job for pending tasks reminder
-        add_action('todo_list_task_reminder', array($plugin_public, 'todo_list_send_task_reminder_email'));
         
     }
     

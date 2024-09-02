@@ -57,6 +57,9 @@ run_todo_list();
 //include rest api endpoints
 include_once plugin_dir_path( __FILE__ ) . 'includes/class-rest-api.php';
 
+//include pending tasks scheduler
+include_once plugin_dir_path( __FILE__ ) . 'includes/class-scheduler.php';
+
 
 // Register REST API routes
 function register_rest_api_routes() {
@@ -71,6 +74,13 @@ add_action('rest_api_init', 'register_rest_api_routes');
 // Activation hook to schedule the cron event
 register_activation_hook(__FILE__, 'todo_list_schedule_task_reminder');
 
+function register_scheduler(){
+  $scheduler = new Scheduler();
+  $scheduler->todo_list_send_task_reminder_email();
+}
+
+// Cron job for pending tasks reminder
+add_action('todo_list_task_reminder','register_scheduler');
 
 function todo_list_schedule_task_reminder() {
   if (!wp_next_scheduled('todo_list_task_reminder')) {
