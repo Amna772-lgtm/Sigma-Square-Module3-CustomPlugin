@@ -1,7 +1,28 @@
 <?php
 class Rest_API
 {
-    
+
+    /**
+     * JWT Authentication function for adding task
+     * and updating task status
+     */
+    public function validate_jwt_authentication($request)
+    {
+        $auth = $request->get_header('Authorization');
+
+        if (empty($auth)) {
+            return new WP_Error('rest_forbidden', 'JWT Token is missing.', array('status' => 403));
+        }
+
+        $auth = str_replace('Bearer ', '', $auth);
+        $user = apply_filters('jwt_auth_token_before_dispatch', null, $auth);
+
+        if (is_wp_error($user)) {
+            return $user;
+        }
+
+        return true;
+    }
     /**
      * Rest API that take user id as parameter and 
      * display list of his/her tasks that he/she added
@@ -59,84 +80,16 @@ class Rest_API
     }
 
 
-
     /**
-     * Rest API that take userid, task, status as parameter
-     * and display respective task_id
+     * Rest API that takes user_id, task_id, status,
+     * updates the task status, and returns true if updated, otherwise false.
      */
-    public function todo_list_register_task_id_api_endpoint()
-    {
-        register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)/(?P<task>[^/]+)/(?P<status>[^/]+)', [
-            'methods' => 'GET',
-            'callback' => [$this, 'get_task_id_by_parameters'],
-            'args' => [
-                'user_id' => [
-                    'required' => true,
-                    'validate_callback' => function ($param, $request, $key) {
-                        return is_numeric($param);
-                    }
-                ],
-                'task' => [
-                    'required' => true,
-                ],
-                'status' => [
-                    'required' => true,
-                ]
-            ]
-        ]);
-    }
-
-
-    /**
-     * Callback function for above rest api
-     */
-
-    public function get_task_id_by_parameters($data)
-    {
-        // Get the parameters from the URL
-        $user_id = $data['user_id'];
-        $task_param = urldecode($data['task']); // Decode the URL-encoded task name
-        $status_param = urldecode($data['status']); // Decode the URL-encoded status
-
-        // Get the user's tasks from the wp_usermeta table
-        $user_tasks = get_user_meta($user_id, 'todo_tasks', true);
-
-        // Check if tasks are already an array
-        $tasks = is_array($user_tasks) ? $user_tasks : [];
-
-        // Search for the task with the matching task and status
-        $task_id = null;
-        foreach ($tasks as $task) {
-            if ($task['task'] === $task_param && $task['status'] === $status_param) {
-                $task_id = $task['id'];
-                break;
-            }
-        }
-
-        if ($task_id !== null) {
-            // Return the task_id in the JSON response
-            $response = ['task_id' => $task_id];
-        } else {
-            // Return an error message if no matching task is found
-            $response = ['error' => 'Task not found'];
-        }
-
-        // Return JSON response
-        wp_send_json($response);
-        exit;
-    }
-
-
-    /**
-     * Rest API that take user_id, task_id, status
-     * and display true if the task found otherwise return false
-     * with error task not found
-     */
-    public function todo_list_register_check_task_api_endpoint()
+    public function todo_list_register_update_task_status_api_endpoint()
     {
         register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)/task/(?P<task_id>[^/]+)/status/(?P<status>[^/]+)', [
-            'methods' => 'GET',
-            'callback' => [$this, 'check_task_by_id_and_status'],
+            'methods' => 'PUT',
+            'callback' => [$this, 'update_task_status_by_id'],
+            'permission_callback' => [$this, 'validate_jwt_authentication'],
             'args' => [
                 'user_id' => [
                     'required' => true,
@@ -147,7 +100,7 @@ class Rest_API
                 'task_id' => [
                     'required' => true,
                     'validate_callback' => function ($param, $request, $key) {
-                        return preg_match('/^[\d\w-]+$/', $param);  
+                        return preg_match('/^[\d\w-]+$/', $param);
                     }
                 ],
                 'status' => [
@@ -156,39 +109,123 @@ class Rest_API
             ]
         ]);
     }
-    
+
+
     /**
-     * Callback function for above API
+     * Callback function to update task status.
      */
-    public function check_task_by_id_and_status($data)
+    public function update_task_status_by_id($data)
     {
         // Get the parameters from the URL
         $user_id = $data['user_id'];
         $task_id_param = urldecode($data['task_id']); // Decode the URL-encoded task ID
-        $status_param = urldecode($data['status']); // Decode the URL-encoded status
-    
+        $new_status = urldecode($data['status']);     // Decode the URL-encoded new status
+
         // Get the user's tasks from the wp_usermeta table
         $user_tasks = get_user_meta($user_id, 'todo_tasks', true);
-    
+
         // Check if tasks are already an array
         $tasks = is_array($user_tasks) ? $user_tasks : [];
-    
-        // Search for the task with the matching task_id and status
+
+        // Flag to check if task is found and updated
         $task_found = false;
-        foreach ($tasks as $task) {
-            if (isset($task['id']) && $task['id'] === $task_id_param && $task['status'] === $status_param) {
+
+        // Search for the task by ID and update its status
+        foreach ($tasks as &$task) {
+            if (isset($task['id']) && $task['id'] === $task_id_param) {
+                $task['status'] = $new_status; // Update the task status
                 $task_found = true;
                 break;
             }
         }
-    
-        // Return JSON response based on whether the task was found
+
         if ($task_found) {
-            wp_send_json(['task_found' => true]);
+            // Update the tasks back into the user meta
+            $update_result = update_user_meta($user_id, 'todo_tasks', $tasks);
+
+            // Debugging step: Log whether update_user_meta was successful
+            error_log('Update user meta result: ' . ($update_result ? 'Success' : 'Failure'));
+
+            // Return success response
+            wp_send_json(['success' => true, 'message' => 'Task status updated successfully']);
         } else {
-            wp_send_json(['task_found' => false, 'error' => 'Task not found']);
+            // Return error response if task was not found
+            wp_send_json(['success' => false, 'error' => 'Task not found']);
         }
+
         exit;
     }
- 
+
+    public function todo_list_register_add_task_api_endpoint()
+    {
+        register_rest_route('todo-list/v1', '/user/(?P<user_id>\d+)/add-task', [
+            'methods' => 'POST',
+            'callback' => [$this, 'add_task_to_user_todo_list'],
+            'permission_callback' => [$this, 'validate_jwt_authentication'],
+            'args' => [
+                'user_id' => [
+                    'required' => true,
+                    'validate_callback' => function ($param, $request, $key) {
+                        return is_numeric($param);
+                    }
+                ],
+                'task' => [
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ],
+                'status' => [
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field'
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * Callback function for adding a task to the user's to-do list
+     */
+    public function add_task_to_user_todo_list($data)
+    {
+        // Get the parameters from the request
+        $user_id = $data['user_id'];
+        $task_name = sanitize_text_field($data['task']);
+        $status = sanitize_text_field($data['status']);
+
+        // Get the user's existing tasks from the wp_usermeta table
+        $user_tasks = get_user_meta($user_id, 'todo_tasks', true);
+
+        // Check if tasks are already an array, otherwise initialize as an array
+        if (!is_array($user_tasks)) {
+            $user_tasks = [];
+        }
+
+        // Generate a new task ID in the format user_id-uniqid
+        $new_task_id = $user_id . '-' . uniqid();
+
+        // Create a new task array
+        $new_task = [
+            'id' => $new_task_id,
+            'task' => $task_name,
+            'status' => $status
+        ];
+
+        // Add the new task to the user's tasks
+        $user_tasks[] = $new_task;
+
+        // Update the user's tasks in the wp_usermeta table
+        update_user_meta($user_id, 'todo_tasks', $user_tasks);
+
+        // Return a success response with the new task ID
+        $response = [
+            'success' => true,
+            'task_id' => $new_task_id,
+            'message' => 'Task added successfully'
+        ];
+
+        // Return JSON response
+        wp_send_json($response);
+        exit;
+    }
 }
+
+

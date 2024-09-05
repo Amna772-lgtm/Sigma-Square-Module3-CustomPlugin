@@ -65,9 +65,10 @@ include_once plugin_dir_path( __FILE__ ) . 'includes/class-scheduler.php';
 function register_rest_api_routes() {
   $rest_api = new Rest_API();
   $rest_api->todo_list_register_api_endpoint();
-  $rest_api->todo_list_register_task_id_api_endpoint();
-  $rest_api->todo_list_register_check_task_api_endpoint();
+  $rest_api->todo_list_register_update_task_status_api_endpoint();
+  $rest_api->todo_list_register_add_task_api_endpoint();
 }
+
 add_action('rest_api_init', 'register_rest_api_routes');
 
 
